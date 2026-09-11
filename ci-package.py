@@ -22,11 +22,26 @@ elif sys.argv[1] == 'package':
     prefix = f'Meshsense-Black-Edition-{version}'
     installer = root / 'electron/dist' / f'{prefix}{suffix}'
     source = root / 'release' / f'{prefix}-source.zip'
+    if platform == 'linux-x64' and not installer.is_file():
+        # AppImage builders may spell the architecture x86_64 instead of x64.
+        # Also accept the earlier configured name without the platform segment.
+        candidates = [root / 'electron/dist' / name for name in (
+            f'{prefix}-linux-x86_64.AppImage',
+            f'{prefix}-x64.AppImage',
+            f'{prefix}-x86_64.AppImage',
+        )]
+        matches = [p for p in candidates if p.is_file()]
+        if len(matches) == 1:
+            installer = matches[0]
+        elif len(matches) > 1:
+            raise SystemExit(f'Ambiguous AppImage outputs: {[p.name for p in matches]}')
     if not installer.is_file() or not source.is_file():
-        raise SystemExit('Build output missing; refusing to create incomplete release assets.')
+        for directory in (root / 'electron/dist', root / 'release'):
+            print(f'Files in {directory}: {[p.name for p in directory.iterdir() if p.is_file()] if directory.exists() else "directory absent"}', flush=True)
+        raise SystemExit(f'Build output missing. Expected installer: {installer}; expected source: {source}')
     out = root / 'release/ci'
     out.mkdir(parents=True, exist_ok=True)
-    files = [out / installer.name, out / f'{prefix}-{platform}-source.zip']
+    files = [out / f'{prefix}{suffix}', out / f'{prefix}-{platform}-source.zip']
     shutil.copyfile(installer, files[0])
     shutil.copyfile(source, files[1])
     instructions = ('Run the EXE installer.' if platform == 'windows-x64' else

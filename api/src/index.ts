@@ -4,7 +4,7 @@ import { app, createRoutes, finalize, server } from './lib/server'
 import './meshtastic'
 import { clearCompletedStatuses } from './nodeRequests'
 import { connect, disconnect, deleteNodes, requestPosition, requestNodeData, send, traceRoute, setPosition, deviceConfig } from './meshtastic'
-import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, enableTLS, meshSenseNewsDate, allowRemoteMessaging, connectionStatus, broadcastId, myNodeNum } from './vars'
+import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, enableTLS, meshSenseNewsDate, allowRemoteMessaging, connectionStatus, broadcastId, myNodeNum, version, headless } from './vars'
 import { hostname } from 'os'
 import intercept from 'intercept-stdout'
 import { createWriteStream } from 'fs'
@@ -49,6 +49,10 @@ function isAuthorized(req: any) {
 }
 
 createRoutes((app) => {
+  if (process.env.MESHSENSE_HEADLESS === '1') {
+    version.set(process.env.MESHSENSE_VERSION || 'headless')
+    headless.set(true as any)
+  }
   app.post('/clearNodeRequestStatus', (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
     const destination = req.body.destination

@@ -1,6 +1,8 @@
 # Meshsense Black Edition — modification notice
 
-Modified on 11 September 2026. Release: 1.1.0-black.5.
+Modified on 11 September 2026. Release: 1.1.0-black.6.
+
+Black.6 adds a separate ARM64 headless Pi package built in Debian Bookworm, with a Node 24 prerequisite, user service example, SSH-tunnel browser access and its own hosted startup test. Pi hardware validation remains outstanding. Desktop builds remain included. Localhost UI controls now also recognise 127.0.0.1 and IPv6 loopback.
 
 Black.5: bounded HTTP retries and request timeouts, cancellation, explicit TLS persistence protected against generic WebSocket overwrites, discarded stale startup state, auto-connect off by default, loopback-only internal server by default and macOS Local Network usage description. See MAC-CONNECTION-TEST.md for remaining ad-hoc signing limitations and real-Mac checks.
 

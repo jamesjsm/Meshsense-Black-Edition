@@ -1,5 +1,7 @@
 # Build installers on GitHub
 
+Black.6 additionally builds **desktop-pi-arm64-headless** on an ARM64 runner inside Debian Bookworm. This is a separate service tarball, not an AppImage. See `pi/README-PI.md`: Node 24 is required on the Pi, browser access uses an SSH tunnel, and no desktop is needed. Draft releases now wait for the four desktop jobs and the Pi job. Its first hosted build and real-Pi test remain outstanding.
+
 Updated for Black.5. The previous Black.4 Windows and Mac jobs passed on GitHub. Black.5 includes connection fixes and adds a Linux x64 job; its hosted builds and real-device retests remain outstanding. Existing installers are unchanged.
 
 ## Upload the project

@@ -66,9 +66,35 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  pi-headless:
+    runs-on: ubuntu-24.04-arm
+    container: node:24-bookworm
+    timeout-minutes: 60
+    env:
+      PYTHON: python3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y python3 cmake pkg-config libdbus-1-dev
+          npm install --global pnpm@11.19.0
+      - name: Check source
+        run: python3 ci-package.py check
+      - name: Build native Pi service and source
+        run: node build-custom.mjs --install --headless-package
+      - name: Test extracted Pi package without a desktop
+        run: node pi-smoke-test.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-pi-arm64-headless
+          path: release/pi/*
+          if-no-files-found: error
+          retention-days: 30
+
   draft-release:
     if: inputs.draft_release
-    needs: build
+    needs: [build, pi-headless]
     runs-on: ubuntu-latest
     permissions:
       contents: write

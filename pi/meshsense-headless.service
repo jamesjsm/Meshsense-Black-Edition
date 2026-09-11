@@ -1,0 +1,14 @@
+[Unit]
+Description=Meshsense Black Edition headless service
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/meshsense-headless
+ExecStart=%h/meshsense-headless/start.sh
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

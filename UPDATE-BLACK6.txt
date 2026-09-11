@@ -1,0 +1,19 @@
+BLACK.6 — RASPBERRY PI HEADLESS BUILD
+
+Copy this update ZIP's contents into your existing GitHub repository folder,
+merge folders and replace matching files (including .github).
+Commit as: Add Raspberry Pi ARM64 headless package
+Push origin and start a NEW workflow run from main. Leave draft release off.
+
+Expected jobs: the existing four desktop builds plus pi-headless.
+The new artifact is desktop-pi-arm64-headless. It contains a tar.gz,
+matching source ZIP, checksums and README-pi-arm64.md.
+
+This update also includes the recent Black.5 connection and Linux fixes.
+Pi target: 64-bit Raspberry Pi OS Bookworm or newer, initially Pi 4/5.
+Requires Node.js 24 on the Pi. No desktop or Electron is required.
+Browser access from another device uses the documented SSH tunnel.
+Direct unauthenticated access through the Pi's LAN address is not enabled.
+
+The build configuration has been checked locally. No ARM64 Pi package has
+been built or tested on actual Pi hardware from this Windows machine.

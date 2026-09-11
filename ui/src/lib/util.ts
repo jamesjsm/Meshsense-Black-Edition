@@ -7,7 +7,7 @@ import axios from 'axios'
 export let blockUserKey = writable(false)
 export const userKey = writable(localStorage.getItem('userKey') || '')
 
-export const hasAccess = derived([accessKey, userKey], ([$accessKey, $userKey]) => window.location.hostname == 'localhost' || ($accessKey != '' && $accessKey == $userKey))
+export const hasAccess = derived([accessKey, userKey], ([$accessKey, $userKey]) => ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname) || (Boolean($accessKey) && $accessKey == $userKey))
 
 let failedUserKeyAttempts = 0
 userKey.subscribe(async (value) => {

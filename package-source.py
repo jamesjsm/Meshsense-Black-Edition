@@ -2,7 +2,7 @@
 Modified 2026-09-08. GPL-3.0-only; see LICENSE.
 """
 from pathlib import Path
-import json, os, zipfile, shutil
+import json, os, zipfile, shutil, sys
 
 root = Path(__file__).resolve().parent
 version = json.loads((root / 'electron/package.json').read_text(encoding='utf-8-sig'))['version']
@@ -45,6 +45,8 @@ if not native_license.startswith('MIT License'):
 notices.extend(['Native Bluetooth: webbluetooth v3.2.1; SimpleBLE 818eeb43574119bde87e9b8cdfea34e9bb17dc98.', native_license])
 runtime = root / 'electron/node_modules/electron/dist'
 for original, target in [('LICENSE', 'LICENSE.electron.txt'), ('LICENSES.chromium.html', 'LICENSES.chromium.html')]:
+    if '--headless' in sys.argv:
+        continue
     if not (runtime / original).exists():
         raise SystemExit(f'Missing Electron runtime notice: {original}. Install the runtime before packaging.')
     shutil.copyfile(runtime / original, root / 'ui/public' / target)

@@ -44,7 +44,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake pkg-config libdbus-1-dev bluez libgtk-3-0t64 libnss3 libgbm1 libasound2t64 libfuse2t64 xvfb
+          sudo apt-get install -y build-essential cmake pkg-config libdbus-1-dev dbus bluez libgtk-3-0t64 libnss3 libgbm1 libasound2t64 libfuse2t64 xvfb
       - name: Check populated dependency sources
         run: python ci-package.py check
       - name: Build application and source
@@ -56,7 +56,7 @@ jobs:
         if: runner.os == 'Linux'
         env:
           MESHSENSE_CI_NO_SANDBOX: '1'
-        run: xvfb-run --auto-servernum node smoke-test.mjs
+        run: dbus-run-session -- xvfb-run --auto-servernum node smoke-test.mjs
       - name: Prepare release files
         run: python ci-package.py package ${{ matrix.platform }}
       - uses: actions/upload-artifact@v4

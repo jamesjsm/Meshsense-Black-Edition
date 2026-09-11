@@ -1,5 +1,6 @@
 import { Bluetooth } from '../../webbluetooth/dist'
 import { State } from './state'
+import { canProbeBluetooth } from './bluetoothHost'
 import { BluetoothDeviceImpl } from '../../webbluetooth/dist/device'
 
 export let bluetoothDevices: Record<string, BluetoothDeviceImpl> = {}
@@ -43,6 +44,10 @@ export async function scanForDevice() {
 }
 
 export async function beginScanning(targetId?: string) {
+  if (!canProbeBluetooth()) {
+    console.log('[bluetooth] No Linux Bluetooth adapter/system bus; skipping discovery')
+    return
+  }
   deviceTargetId = targetId
   delete bluetoothDevices[targetId]
   if (scanning) {

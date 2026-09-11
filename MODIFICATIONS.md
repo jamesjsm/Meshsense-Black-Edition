@@ -6,6 +6,8 @@ Black.5: bounded HTTP retries and request timeouts, cancellation, explicit TLS p
 
 Added Linux x64 AppImage to GitHub builds and draft release assets. Linux compiles the pinned native Bluetooth source and uses its adapter availability check, avoiding the separate node-ble native dependency path. Linux runtime verification remains outstanding.
 
+Linux startup follow-up: skip native Bluetooth discovery when sysfs reports no adapter or the system D-Bus socket is absent. CI starts a dedicated D-Bus session alongside Xvfb. This addresses the observed stall before the HTTP server starts on a runner without Bluetooth hardware; a new hosted run is needed to confirm it.
+
 Added manual GitHub Actions builds for Windows x64 and macOS Intel/Apple Silicon, matching per-platform source assets, checksums and optional draft releases. macOS uses locally compiled Bluetooth source and ad-hoc signing, without notarisation. The first hosted builds and Mac hardware tests remain outstanding.
 
 Maintenance update: Electron upgraded from 33.4.11 to 44.3.0, pinned in the dependency manifest and lockfile. Previous Black.2 packages remain separate for rollback. Live radio, Linux and macOS verification remains outstanding.

@@ -25,6 +25,7 @@ if (process.argv.includes('--install')) {
 }
 node('api/meshtastic-js', 'node_modules/tsup/dist/cli-default.js')
 node('', 'http-connection.test.mjs')
+node('', 'bluetooth-host.test.mjs')
 node('api/webbluetooth', 'node_modules/typescript/bin/tsc')
 node('ui', 'node_modules/svelte-check/bin/svelte-check', '--tsconfig', './tsconfig.json')
 node('ui', 'src/lib/routes.test.mjs')

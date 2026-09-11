@@ -14,6 +14,7 @@ module.exports = {
     hardenedRuntime: false,
     notarize: false,
     extendInfo: {
+      NSLocalNetworkUsageDescription: 'Connect to your Meshtastic radio on your local network.',
       NSBluetoothAlwaysUsageDescription: 'Connect to your Meshtastic radio using Bluetooth.',
       NSBluetoothPeripheralUsageDescription: 'Connect to your Meshtastic radio using Bluetooth.'
     }
@@ -27,6 +28,6 @@ module.exports = {
     signAndEditExecutable: false
   },
   nsis: { ...base.nsis, artifactName: 'Meshsense-Black-Edition-${version}-${arch}.${ext}', installerIcon: 'build/black-edition.ico', uninstallerIcon: 'build/black-edition.ico' },
-  linux: { ...base.linux, target: ['AppImage'], icon: 'build/black-edition.png' },
-  appImage: { artifactName: 'Meshsense-Black-Edition-${version}-${arch}.${ext}' }
+  linux: { ...base.linux, target: ['AppImage'], executableName: 'meshsense-black-edition', maintainer: 'Black Edition contributors', icon: 'build/black-edition.png' },
+  appImage: { artifactName: 'Meshsense-Black-Edition-${version}-linux-${arch}.${ext}' }
 }

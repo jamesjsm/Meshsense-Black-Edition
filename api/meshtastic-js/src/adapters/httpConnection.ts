@@ -18,6 +18,13 @@ export class HttpConnection extends MeshDevice {
   private pendingRequest: boolean;
 
   private abortController: AbortController;
+  private readFailures = 0;
+
+  private request(url: string, options: RequestInit = {}): Promise<Response> {
+    return fetch(url, { ...options, signal: AbortSignal.any([
+      this.abortController.signal, AbortSignal.timeout(10000),
+    ]) });
+  }
 
   private readonly defaultRetryConfig: Types.HttpRetryConfig = {
     maxRetries: 3,
@@ -92,7 +99,7 @@ export class HttpConnection extends MeshDevice {
         }
 
         this.log.warn(
-          `${operationName} failed (attempt ${attempt}/${retryConfig.maxRetries}): ${error.message}`,
+          `${operationName} failed (attempt ${attempt}/${retryConfig.maxRetries}): ${error instanceof Error ? error.message : "request failed"}`,
         );
 
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -101,18 +108,20 @@ export class HttpConnection extends MeshDevice {
           retryConfig.maxDelayMs,
         );
       } catch (error) {
-        // If it's not a Response error (e.g., network error), don't retry
-        if (!(error instanceof Error) || !error.message.startsWith("HTTP")) {
-          throw error;
-        }
-
-        if (attempt === retryConfig.maxRetries) {
+        if (this.abortController.signal.aborted || attempt === retryConfig.maxRetries) {
           throw error;
         }
 
         this.log.warn(
-          `${operationName} failed (attempt ${attempt}/${retryConfig.maxRetries}): ${error.message}`,
+          `${operationName} failed (attempt ${attempt}/${retryConfig.maxRetries}): ${error instanceof Error ? error.message : "request failed"}`,
         );
+        await new Promise<void>((resolve, reject) => {
+          const signal = this.abortController.signal;
+          const cancel = () => { clearTimeout(timer); reject(new Error('Connection cancelled')); };
+          const timer = setTimeout(() => { signal.removeEventListener('abort', cancel); resolve(); }, delay);
+          signal.addEventListener('abort', cancel, { once: true });
+        });
+        delay = Math.min(delay * retryConfig.backoffFactor, retryConfig.maxDelayMs);
       }
     }
 
@@ -131,7 +140,7 @@ export class HttpConnection extends MeshDevice {
 
     // We create a dummy request here just to have a Response object to work with
     // The actual connection check is done via ping()
-    const response = await fetch(`${this.portId}/index.html`, {
+    const response = await this.request(`${this.portId}/index.html`, {
       signal: this.abortController.signal,
       mode: "no-cors",
     });
@@ -153,6 +162,7 @@ export class HttpConnection extends MeshDevice {
     tls = false,
   }: Types.HttpConnectionParameters): Promise<void> {
     // Set initial state
+    if (this.abortController.signal.aborted) return;
     this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceConnecting);
     this.receiveBatchRequests = receiveBatchRequests;
 
@@ -179,7 +189,7 @@ export class HttpConnection extends MeshDevice {
         await this.configure().catch((error) => {
           this.log.warn(
             Types.Emitter[Types.Emitter.Connect],
-            `Configuration warning: ${error.message}`,
+            `Configuration warning: ${error instanceof Error ? error.message : "request failed"}`,
           );
         });
 
@@ -191,7 +201,7 @@ export class HttpConnection extends MeshDevice {
               if (error instanceof Error) {
                 this.log.error(
                   Types.Emitter[Types.Emitter.Connect],
-                  `❌ Read loop error: ${error.message}`,
+                  `❌ Read loop error: ${error instanceof Error ? error.message : "request failed"}`,
                 );
               }
             }
@@ -202,21 +212,11 @@ export class HttpConnection extends MeshDevice {
       if (error instanceof Error) {
         this.log.error(
           Types.Emitter[Types.Emitter.Connect],
-          `❌ Connection failed: ${error.message}`,
+          `❌ Connection failed: ${error instanceof Error ? error.message : "request failed"}`,
         );
       }
 
-      // Only attempt reconnection if we haven't been disconnected
-      if (this.deviceStatus !== Types.DeviceStatusEnum.DeviceDisconnected) {
-        this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceReconnecting);
-
-        this.connect({
-          address,
-          fetchInterval,
-          receiveBatchRequests,
-          tls,
-        });
-      }
+      this.disconnect();
     }
   }
   /** Disconnects from the Meshtastic device */
@@ -225,6 +225,7 @@ export class HttpConnection extends MeshDevice {
     this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceDisconnected);
     if (this.readLoop) {
       clearInterval(this.readLoop);
+      this.readLoop = null;
       this.complete();
     }
   }
@@ -241,7 +242,7 @@ export class HttpConnection extends MeshDevice {
     try {
       const response = await this.withRetry(
         async () => {
-          return await fetch(`${this.portId}/index.html`, {
+          return await this.request(`${this.portId}/index.html`, {
             signal,
             mode: "no-cors",
           });
@@ -260,7 +261,7 @@ export class HttpConnection extends MeshDevice {
       if (error instanceof Error) {
         this.log.error(
           Types.Emitter[Types.Emitter.Ping],
-          `❌ ${error.message}`,
+          `❌ ${error instanceof Error ? error.message : "request failed"}`,
         );
       }
       this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceReconnecting);
@@ -279,7 +280,7 @@ export class HttpConnection extends MeshDevice {
     let error = false;
     while (readBuffer.byteLength > 0 && !error) {
       this.pendingRequest = true;
-      await fetch(
+      await this.request(
         `${this.portId}/api/v1/fromradio?all=${
           this.receiveBatchRequests ? "true" : "false"
         }`,
@@ -292,10 +293,13 @@ export class HttpConnection extends MeshDevice {
         },
       )
         .then(async (response) => {
-          this.pendingRequest = false;
+          if (this.abortController.signal.aborted) { error = true; return; }
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          this.readFailures = 0;
           this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceConnected);
 
           readBuffer = await response.arrayBuffer();
+          this.pendingRequest = false;
 
           if (readBuffer.byteLength > 0) {
             this.handleFromRadio(new Uint8Array(readBuffer));
@@ -308,7 +312,8 @@ export class HttpConnection extends MeshDevice {
             `❌ ${e.message}`,
           );
           error = true;
-          this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceReconnecting);
+          if (++this.readFailures >= 3) this.disconnect();
+          else if (!this.abortController.signal.aborted) this.updateDeviceStatus(Types.DeviceStatusEnum.DeviceReconnecting);
         });
     }
   }
@@ -319,7 +324,7 @@ export class HttpConnection extends MeshDevice {
   protected async writeToRadio(data: Uint8Array): Promise<void> {
     const { signal } = this.abortController;
 
-    await fetch(`${this.portId}/api/v1/toradio`, {
+    await this.request(`${this.portId}/api/v1/toradio`, {
       signal,
       method: "PUT",
       headers: {
@@ -346,3 +351,4 @@ export class HttpConnection extends MeshDevice {
       });
   }
 }
+

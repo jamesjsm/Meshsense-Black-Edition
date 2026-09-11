@@ -64,7 +64,7 @@ function createWindow(): void {
   //   mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   // }
 
-  mainWindow.loadURL(`http://localhost:${apiPort}`)
+  mainWindow.loadURL(`http://127.0.0.1:${apiPort}`)
 }
 
 // This method will be called when Electron has finished

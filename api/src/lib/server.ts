@@ -61,7 +61,7 @@ export let wss: WebSocketHTTPServer
 
 async function initSever() {
   /** Begin Listening for connections */
-  server = app.listen(Number(process.env.PORT) || (await getPort({ port: 5920 })))
+  server = app.listen(Number(process.env.PORT) || (await getPort({ port: 5920 })), process.env.MESHSENSE_BIND_HOST || '127.0.0.1')
   wss = new WebSocketHTTPServer(server, { path: '/ws' })
 
   State.subscribe(({ state, action, args }) => {
@@ -69,6 +69,7 @@ async function initSever() {
   })
 
   wss.msg.on('state', ({ name, action, args }, socket) => {
+    if (name === 'enableTLS' || !State.states[name]) return
     State.states[name].flags.socket = socket
     State.states[name].call(action, args)
     delete State.states[name].flags.socket

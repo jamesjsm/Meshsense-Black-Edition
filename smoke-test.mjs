@@ -9,8 +9,11 @@ const data = join(root, '.test-data', 'packaged-startup')
 mkdirSync(data, { recursive: true })
 const executable = process.platform === 'darwin'
   ? join(root, `electron/dist/${process.arch === 'arm64' ? 'mac-arm64' : 'mac'}/Meshsense Black Edition.app/Contents/MacOS/Meshsense Black Edition`)
+  : process.platform === 'linux' ? join(root, 'electron/dist/linux-unpacked/meshsense-black-edition')
   : join(root, 'electron/dist/win-unpacked/Meshsense Black Edition.exe')
-const child = spawn(executable, ['--headless'], {
+// Isolated hosted CI only; installed applications retain their normal sandbox flags.
+const ciFlags = process.platform === 'linux' && process.env.CI === 'true' && process.env.MESHSENSE_CI_NO_SANDBOX === '1' ? ['--no-sandbox'] : []
+const child = spawn(executable, ['--headless', ...ciFlags], {
   windowsHide: true,
   env: { ...process.env, PORT: '15927', ADDRESS: '', MESHSENSE_DATA_DIR: data },
   stdio: ['ignore', 'pipe', 'pipe']
@@ -29,7 +32,7 @@ try {
     await new Promise(resolve => setTimeout(resolve, 500))
   }
   assert.ok(ready, `Service did not start:\n${output}`)
-  const home = await fetch('http://localhost:15927/')
+  const home = await fetch('http://127.0.0.1:15927/')
   assert.equal(home.status, 200)
   assert.match(await home.text(), /<html/i)
   for (const [path, body, expected] of [
@@ -39,7 +42,7 @@ try {
     ['/traceRoute', { destination: 123 }, 409],
     ['/traceRoute', { destination: 4294967295 }, 400]
   ]) {
-    const result = await fetch(`http://localhost:15927${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    const result = await fetch(`http://127.0.0.1:15927${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     assert.equal(result.status, expected, `${path}: ${await result.text()}`)
   }
   console.log('PASS: packaged service starts, serves the UI, and rejects disconnected/invalid requests. No radio transmissions requested.')

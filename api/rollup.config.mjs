@@ -9,7 +9,7 @@ import inject from '@rollup/plugin-inject'
 import { defineConfig } from 'rollup'
 
 let externals = [
-  ...(process.platform === 'linux' ? [] : ['node-ble']),
+  'node-ble',
   '@mikro-orm/sqlite',
   '@mikro-orm/migrations',
   '@mikro-orm/entity-generator',

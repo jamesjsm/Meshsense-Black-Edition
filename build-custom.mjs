@@ -20,10 +20,11 @@ if (process.argv.includes('--install')) {
     run(dir, windows ? 'pnpm.cmd' : 'pnpm', ['install', '--ignore-scripts', '--frozen-lockfile'])
   }
   node('electron', 'node_modules/electron/install.js')
-  if (mac) node('api/webbluetooth', 'node_modules/cmake-js/bin/cmake-js', 'compile')
+  if (!windows) node('api/webbluetooth', 'node_modules/cmake-js/bin/cmake-js', 'compile')
   else node('api/webbluetooth', 'node_modules/prebuild-install/bin.js', '--runtime', 'napi')
 }
 node('api/meshtastic-js', 'node_modules/tsup/dist/cli-default.js')
+node('', 'http-connection.test.mjs')
 node('api/webbluetooth', 'node_modules/typescript/bin/tsc')
 node('ui', 'node_modules/svelte-check/bin/svelte-check', '--tsconfig', './tsconfig.json')
 node('ui', 'src/lib/routes.test.mjs')
@@ -33,6 +34,7 @@ node('api', 'node_modules/typescript/bin/tsc', '--noEmit', '-p', 'tsconfig.build
 run('', process.env.PYTHON || (windows ? 'py' : 'python3'), ['package-source.py'])
 node('ui', 'node_modules/vite/bin/vite.js', 'build', '--outDir', '../api/dist/static')
 node('api', 'node_modules/rollup/dist/bin/rollup', '-c')
+if (windows) node('', 'tls-state.test.mjs')
 // Preserve the native serial binaries alongside the bundled radio service.
 const serialRoot = join(root, 'api/node_modules/@serialport/bindings-cpp/prebuilds')
 if (existsSync(serialRoot)) {

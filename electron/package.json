@@ -1,6 +1,6 @@
 {
   "name": "meshsense",
-  "version": "1.1.0-black.4",
+  "version": "1.1.0-black.5",
   "description": "Meshsense Black Edition — an independent GPLv3 modification of MeshSense by Affirmatech, with clearer traceroutes and node information requests.",
   "main": "./out/main/index.js",
   "author": "Black Edition contributors (based on MeshSense by Affirmatech Inc.)",

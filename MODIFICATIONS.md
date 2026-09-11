@@ -1,6 +1,10 @@
 # Meshsense Black Edition — modification notice
 
-Modified on 11 September 2026. Release: 1.1.0-black.4 (build preparation).
+Modified on 11 September 2026. Release: 1.1.0-black.5.
+
+Black.5: bounded HTTP retries and request timeouts, cancellation, explicit TLS persistence protected against generic WebSocket overwrites, discarded stale startup state, auto-connect off by default, loopback-only internal server by default and macOS Local Network usage description. See MAC-CONNECTION-TEST.md for remaining ad-hoc signing limitations and real-Mac checks.
+
+Added Linux x64 AppImage to GitHub builds and draft release assets. Linux compiles the pinned native Bluetooth source and uses its adapter availability check, avoiding the separate node-ble native dependency path. Linux runtime verification remains outstanding.
 
 Added manual GitHub Actions builds for Windows x64 and macOS Intel/Apple Silicon, matching per-platform source assets, checksums and optional draft releases. macOS uses locally compiled Bluetooth source and ad-hoc signing, without notarisation. The first hosted builds and Mac hardware tests remain outstanding.
 

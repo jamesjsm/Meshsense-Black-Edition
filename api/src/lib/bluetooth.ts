@@ -55,14 +55,8 @@ export async function beginScanning(targetId?: string) {
 
   /** Look for an available bluetooth adapter */
   try {
-    if (process.platform === 'linux') {
-      const { createBluetooth } = await import('node-ble')
-      const { bluetooth: linuxBluetooth, destroy } = createBluetooth()
-      try { adapterAvailable = (await linuxBluetooth.adapters()).length > 0 }
-      finally { destroy() }
-    } else {
-      adapterAvailable = await bluetooth.getAvailability()
-    }
+    // Use the same native adapter for availability and connections on every OS.
+    adapterAvailable = await bluetooth.getAvailability()
   } catch (e) {
     console.warn('[bluetooth] Unable to detect Bluetooth adapters')
   }

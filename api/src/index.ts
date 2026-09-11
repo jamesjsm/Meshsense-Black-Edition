@@ -4,7 +4,7 @@ import { app, createRoutes, finalize, server } from './lib/server'
 import './meshtastic'
 import { clearCompletedStatuses } from './nodeRequests'
 import { connect, disconnect, deleteNodes, requestPosition, requestNodeData, send, traceRoute, setPosition, deviceConfig } from './meshtastic'
-import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, meshSenseNewsDate, allowRemoteMessaging, connectionStatus, broadcastId, myNodeNum } from './vars'
+import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, enableTLS, meshSenseNewsDate, allowRemoteMessaging, connectionStatus, broadcastId, myNodeNum } from './vars'
 import { hostname } from 'os'
 import intercept from 'intercept-stdout'
 import { createWriteStream } from 'fs'
@@ -98,8 +98,19 @@ createRoutes((app) => {
 
   app.post('/connect', async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
+    if (req.body.enableTLS !== undefined) {
+      if (typeof req.body.enableTLS !== 'boolean') return res.sendStatus(400)
+      enableTLS.set(req.body.enableTLS)
+    }
     console.log('[express]', '/connect')
-    connect(req.body.address || address.value)
+    connect(req.body.address || address.value).catch(() => { disconnect(); console.warn('[connect] Connection attempt stopped') })
+    return res.sendStatus(200)
+  })
+
+  app.post('/connectionTLS', (req, res) => {
+    if (!isAuthorized(req)) return res.sendStatus(403)
+    if (typeof req.body.enableTLS !== 'boolean') return res.sendStatus(400)
+    enableTLS.set(req.body.enableTLS)
     return res.sendStatus(200)
   })
 

@@ -14,6 +14,7 @@ export let socket: WebSocket | undefined = undefined
 export let status: 'Ready' | 'Connecting' | 'Connected' | 'Disconnected' | 'Closed' = 'Ready'
 
 let pendingMessages: MessageObject[] = []
+let initialised = false
 let reconnectTimeout: ReturnType<typeof setTimeout>
 
 export class WebSocketClient {
@@ -21,7 +22,7 @@ export class WebSocketClient {
     if (endpoint) this.connect(endpoint)
     if (syncStates) {
       State.subscribe(({ state, action, args }) => {
-        if (!state.flags.fromRemote) this.send('state', { name: state.name, action, args })
+        if (initialised && !state.flags.fromRemote) this.send('state', { name: state.name, action, args })
       })
 
       function setState(name, action, args) {
@@ -38,6 +39,7 @@ export class WebSocketClient {
         for (let [name, value] of Object.entries(stateData)) {
           setState(name, 'set', [value])
         }
+        initialised = true
       })
     }
   }
@@ -51,6 +53,8 @@ export class WebSocketClient {
       socket = new WebSocket(endpoint)
 
       socket.onclose = (e) => {
+        initialised = false
+        pendingMessages = pendingMessages.filter(message => message.event !== 'state')
         console.log(`Connection closed with ${endpoint}`)
         status = 'Closed'
         reconnectTimeout = setTimeout(() => this.connect(endpoint), reconnectDelay + 500)
@@ -60,7 +64,9 @@ export class WebSocketClient {
         console.log(`Connected to ${endpoint}`)
         status = 'Connected'
         events.emit('connect', e)
-        for (let message of pendingMessages) this.send(message.event, message.data)
+        const pending = pendingMessages
+        pendingMessages = []
+        for (let message of pending) if (message.event !== 'state') this.send(message.event, message.data)
       }
       socket.onerror = (e) => {
         console.error(`Failed websocket connection to ${endpoint}`)

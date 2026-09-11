@@ -15,7 +15,15 @@
   }
 
   function connect() {
-    axios.post('/connect', { address: $address })
+    axios.post('/connect', { address: $address, enableTLS: $enableTLS }).catch(() => error = 'Unable to start connection')
+  }
+
+  let error = ''
+  function saveTLS(event: Event) {
+    error = ''
+    const checked = (event.currentTarget as HTMLInputElement).checked
+    enableTLS.set(checked)
+    axios.post('/connectionTLS', { enableTLS: checked }).catch(() => error = 'TLS setting could not be saved. Please reconnect the app.')
   }
 
   function disconnect() {
@@ -48,7 +56,7 @@
       {#if $connectionStatus == 'disconnected'}
         <label class="select-none btn cursor-pointer text-center text-sm">
           TLS
-          <input type="checkbox" bind:checked={$enableTLS} />
+          <input type="checkbox" bind:checked={$enableTLS} on:change={saveTLS} />
         </label>
         <button class="btn w-full h-full col-span-full saturate-150">Connect</button>
       {:else if $connectionStatus == 'connected'}
@@ -58,4 +66,5 @@
       {/if}
     {/if}
   </form>
+  <div class="px-2 pb-2 text-xs text-white/70">Network mode: {$enableTLS ? 'HTTPS / TLS' : 'HTTP'}. {error}</div>
 </Card>

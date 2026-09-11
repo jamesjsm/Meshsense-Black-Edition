@@ -203,7 +203,7 @@ export function reset() {
  * @param {string} address - The IP address of the MeshTastic Node to connect to.
  */
 export async function connect(address?: string) {
-  console.log('[meshtastic] Calling connect', address)
+  console.log('[meshtastic] Starting connection attempt')
 
   await disconnect(false)
   connectionIntended = true
@@ -229,6 +229,7 @@ export async function connect(address?: string) {
   }
 
   connectionStatus.set('connecting')
+  const activeConnection = connection
   channels.set([])
   updateTimeout()
 
@@ -240,6 +241,7 @@ export async function connect(address?: string) {
   //   DeviceConfiguring = 6,
   //   DeviceConfigured = 7,
   connection.events.onDeviceStatus.subscribe(async (e) => {
+    if (connection !== activeConnection) return
     console.log('[meshtastic] Device Status', e)
     if (e == 6) {
       connectionStatus.set('configuring')
@@ -251,13 +253,14 @@ export async function connect(address?: string) {
       // } else if (e == 4) {
       // await disconnect()
     } else if (e == 2) {
+      clearTimeout(activeConnection['timeout'])
       console.log('Connection Intended', connectionIntended)
-      if (connectionIntended) {
+      if (connectionIntended && !(connection instanceof HttpConnection)) {
         connectionStatus.set('reconnecting')
         connect(address)
       } else {
+        connectionIntended = false
         connectionStatus.set('disconnected')
-        reset()
       }
     }
   })
@@ -429,6 +432,7 @@ export async function connect(address?: string) {
     // console.log('[meshtastic]', 'Updating timeout')
     clearTimeout(connection['timeout'])
     connection['timeout'] = setTimeout(() => {
+      if (connection !== activeConnection) return
       if (connectionStatus.value != 'connected') {
         console.log('[meshtastic]', 'No recent data from device, assuming disconnected')
         disconnect(false)
@@ -490,7 +494,7 @@ export async function connect(address?: string) {
   })
 
   // Attempt to connect to the specified MeshTastic Node
-  console.log('[meshtastic] Connecting to Node', address, connection instanceof BleConnection ? 'via Bluetooth' : 'via IP')
+  console.log('[meshtastic] Connecting to Node', connection instanceof BleConnection ? 'via Bluetooth' : `${enableTLS.value ? 'https' : 'http'}://${new URL('http://' + address).host}`)
   if (connection instanceof BleConnection) {
     // console.log(bluetoothDevices[address])
     await connection.connect({ device: bluetoothDevices[address] })

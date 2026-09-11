@@ -1,0 +1,34 @@
+BLACK.5 GITHUB UPDATE
+
+1. Extract Meshsense-Black-Edition-black.5-update.zip.
+2. Copy EVERYTHING INSIDE the extracted folder into your existing GitHub
+   repository folder (the one shown by GitHub Desktop > Show in Explorer).
+   Merge the folders and replace matching files. Do not create a nested folder.
+   The .github folder is included and must be copied too.
+3. In GitHub Desktop review Changes. Expect the workflow, app version,
+   connection code, tests, documentation and the corrected Mac icon.
+4. Commit with: Fix connection retries and TLS; add Linux build
+5. Push origin.
+6. Start a NEW Actions > Build desktop packages run from main.
+   Leave draft release off for this test. Do not rerun an older commit.
+
+Expected outputs: Windows x64 EXE, Mac ARM64 DMG, Mac Intel DMG,
+and Linux x64 AppImage. Each artifact also has matching source and instructions.
+
+Black.5 connection changes:
+- Five HTTP connection attempts with delayed exponential backoff.
+- Ten-second request timeout and cancellable retry waits.
+- No recursive HTTP reconnect loop; failure returns to Disconnected.
+- TLS saved explicitly; generic WebSocket updates cannot turn it off.
+- Startup sync drops stale state; new installs default auto-connect off.
+- Internal service defaults to loopback-only access.
+- Mac Local Network usage description; existing stable bundle identifier.
+
+The Mac build remains ad-hoc signed, not Developer ID signed or notarised.
+Finder/Dock Local Network permission behaviour is NOT guaranteed fixed.
+See MAC-CONNECTION-TEST.md for the friend's retest steps.
+
+Linux is a NEW test target (Ubuntu 24.04-compatible x64), not Raspberry Pi/ARM.
+Its first GitHub build and real Linux desktop/radio tests are still required.
+Local tests passed for retry/cancel/timeout, service failure handling,
+TLS persistence and interface types. No new hosted packages have been built here.

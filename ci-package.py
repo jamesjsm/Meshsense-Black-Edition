@@ -16,9 +16,9 @@ if sys.argv[1] == 'check':
     print('Dependency source and lockfile checks passed.')
 elif sys.argv[1] == 'package':
     platform = sys.argv[2]
-    if platform not in ('windows-x64', 'macos-arm64', 'macos-x64'):
+    if platform not in ('windows-x64', 'macos-arm64', 'macos-x64', 'linux-x64'):
         raise SystemExit('Unknown platform')
-    suffix = '-x64.exe' if platform == 'windows-x64' else f'-{platform}.dmg'
+    suffix = '-x64.exe' if platform == 'windows-x64' else '-linux-x64.AppImage' if platform == 'linux-x64' else f'-{platform}.dmg'
     prefix = f'Meshsense-Black-Edition-{version}'
     installer = root / 'electron/dist' / f'{prefix}{suffix}'
     source = root / 'release' / f'{prefix}-source.zip'
@@ -30,6 +30,7 @@ elif sys.argv[1] == 'package':
     shutil.copyfile(installer, files[0])
     shutil.copyfile(source, files[1])
     instructions = ('Run the EXE installer.' if platform == 'windows-x64' else
+                    'Mark the AppImage executable in file Properties, then run it. This x64 test build targets Ubuntu 24.04 or newer compatible systems; older distributions may lack its native libraries. Bluetooth needs BlueZ and a running system D-Bus. AppImage mounting may need libfuse2t64 on Ubuntu 24.04. This is not an ARM/Raspberry Pi build.' if platform == 'linux-x64' else
                     'Open the DMG and drag the app to Applications. This is an ad-hoc signed testing build, not Apple-notarised. macOS may block it. A trusted, signed/notarised public release is still needed.')
     readme = out / f'README-{platform}.txt'
     readme.write_text(f'Meshsense Black Edition {version} — {platform}\n\n{instructions}\nClose any other MeshSense app before connecting to the same radio.\nKeep the matching source ZIP when sharing this installer. No developer tools are required to run it.\nIndependent GPLv3 modification of MeshSense by Affirmatech; not an official Affirmatech release. See the source and About / Legal for notices and terms.\nThese builds need real-radio and platform testing before public stable release.\n', encoding='utf-8')

@@ -1,6 +1,6 @@
 # Build installers on GitHub
 
-Prepared 11 September 2026. The workflow is ready for its first hosted run; it has not yet produced or tested a macOS installer. Black.3 Windows installers remain unchanged. The next build version is Black.4.
+Updated for Black.5. The previous Black.4 Windows and Mac jobs passed on GitHub. Black.5 includes connection fixes and adds a Linux x64 job; its hosted builds and real-device retests remain outstanding. Existing installers are unchanged.
 
 ## Upload the project
 
@@ -10,15 +10,15 @@ Prepared 11 September 2026. The workflow is ready for its first hosted run; it h
 
 ## Run a build
 
-On GitHub open **Actions → Build desktop packages → Run workflow**. Leave **Create a draft release** off for the first test run. The three jobs build Windows x64, macOS Apple Silicon and macOS Intel on matching hosted machines. No Apple certificate or other secret is required for these testing builds.
+On GitHub open **Actions → Build desktop packages → Run workflow**. Leave **Create a draft release** off for the first test run. Four jobs build Windows x64, macOS Apple Silicon, macOS Intel and Linux x64 on matching hosted machines. No Apple certificate or other secret is required for these testing builds.
 
-When a run succeeds, open its summary and download the three **Artifacts**. Each artifact contains its installer, matching source ZIP, readme and checksums. Windows gets `.exe`; Macs get `.dmg`. These downloads require GitHub access and expire after 30 days; use Releases for lasting downloads.
+When a run succeeds, download its four **Artifacts**. Each contains a package, matching source, readme and checksums: Windows `.exe`, Macs `.dmg`, Linux `.AppImage`. Actions downloads require GitHub access and expire after 30 days; use Releases for lasting downloads.
 
-If a job fails, open the red step and share its log. The Mac native Bluetooth build, packaging and startup check particularly need their first hosted run. No working Mac package is claimed until those pass, and actual Bluetooth permissions/connections still require testing on a Mac.
+If a job fails, open the red step and share its log. Linux requires its first hosted build. For Macs, follow MAC-CONNECTION-TEST.md: successful packaging does not establish Finder/Dock Local Network access with ad-hoc signing.
 
 ## Create downloadable EXE/DMG releases
 
-Once testing is satisfactory, run the workflow with **Create a draft release** selected. All three builds must pass before it creates a draft pre-release tagged from the exact build commit. Review the notes and assets in **Releases**, then publish manually. The workflow never publishes a release automatically.
+Once testing is satisfactory, run the workflow with **Create a draft release** selected. All four builds must pass before it creates a draft pre-release tagged from the exact build commit. Review the notes and assets in **Releases**, then publish manually. The workflow never publishes a release automatically.
 
 Use a new version in `electron/package.json` for each new release. Update modification dates/notices too. An existing release tag causes creation to fail rather than overwrite its files. A failed draft step does not remove successful build artifacts.
 
@@ -28,7 +28,7 @@ Each platform's source ZIP has a distinct name because dependencies and runtime 
 
 Mac builds are ad-hoc signed and not notarised. Gatekeeper may block downloads. They are for testing, not a claim of Apple-approved distribution. Public-friendly Mac installation requires your own Developer ID signing and notarisation configuration in a later step. Electron 44 requires macOS 13 or later.
 
-Linux is not included in this first workflow: the existing AppImage path and Linux-specific native dependencies need separate verification. No Mac or Linux testing has taken place on this Windows PC.
+Linux uses Ubuntu 24.04 x64, builds the native Bluetooth component from its pinned source, and runs the packaged service under Xvfb. The CI-only startup check disables Chromium's sandbox on the disposable hosted runner; it does not change installed-app defaults and is not proof of desktop sandbox compatibility. Test the AppImage on a real Linux desktop, including sandbox startup, BlueZ/D-Bus permissions, serial access and radio connections. This build is not for ARM/Raspberry Pi, and older distributions may not provide the native libraries it requires.
 
 ## Local checks
 

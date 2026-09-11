@@ -1,0 +1,59 @@
+{
+  "name": "@meshtastic/js",
+  "version": "2.5.9-3",
+  "description": "Browser library for interfacing with meshtastic devices",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "tsup",
+    "build:biome": "tsup && pnpm biome format .",
+    "lint": "pnpm biome check",
+    "lint:fix": "pnpm biome check --fix",
+    "format": "pnpm biome format .",
+    "format:fix": "pnpm biome format . --fix",
+    "generate:docs": "typedoc src/index.ts"
+  },
+  "keywords": [
+    "meshtastic bluetooth serial webserial webbluetooth ble http library typescript javascript"
+  ],
+  "publishConfig": {
+    "provenance": true
+  },
+  "sideEffects": false,
+  "type": "module",
+  "packageManager": "pnpm@9.1.4",
+  "module": "./dist/index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.ts",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/meshtastic/js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meshtastic/js.git"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.2.1",
+    "@meshtastic/protobufs": "npm:@jsr/meshtastic__protobufs@^2.5.9",
+    "crc": "^4.3.2",
+    "ste-simple-events": "^3.0.11",
+    "tslog": "^4.9.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.3",
+    "@types/node": "^22.7.5",
+    "@types/w3c-web-serial": "^1.0.7",
+    "@types/web-bluetooth": "^0.0.20",
+    "pnpm": "^10.4.1",
+    "tsup": "^8.3.0",
+    "typedoc": "^0.26.8",
+    "typescript": "^5.6.2"
+  }
+}

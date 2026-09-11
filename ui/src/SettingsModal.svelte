@@ -1,0 +1,63 @@
+<script context="module">
+  export let showConfigModal = writable(false)
+  let modalPage = writable('Settings')
+
+  export function showPage(pageName = 'Settings') {
+    modalPage.set(pageName)
+    showConfigModal.set(true)
+  }
+</script>
+
+<script>
+  import Modal from './lib/Modal.svelte'
+  import { license } from './gpl3'
+  import Settings from './Settings.svelte'
+  import { writable } from 'svelte/store'
+  import { hasAccess } from './lib/util'
+  import SystemLog from './SystemLog.svelte'
+  import DeviceConfig from './DeviceConfig.svelte'
+  import Channels from './Channels.svelte'
+  import About from './About.svelte'
+</script>
+
+<Modal title="Meshsense Black Edition" bind:visible={$showConfigModal}>
+  <div class="grid grid-rows-[auto_1fr] gap-2">
+    <!-- Sidebar -->
+    <div class="flex gap-1 -m-2 px-2 p-2 flex-wrap items-center border-b border-black/20 to-black/10 bg-gradient-to-b from-transparent">
+      {#each ['Settings', 'Device', 'Channels', 'Log', 'About / Legal'] as category}
+        <button
+          class:hidden={['Log', 'Device', 'Channels'].includes(category) && !$hasAccess}
+          on:click={() => ($modalPage = category)}
+          class="btn btn-sm h-7 min-w-20 {$modalPage == category ? 'brightness-125' : 'grayscale'}">{category}</button
+        >
+      {/each}
+    </div>
+    <!-- Content -->
+    <div class="p-2 grid h-full overflow-auto">
+      {#if $modalPage == 'Settings'}
+        <Settings />
+      {:else if $modalPage == 'About / Legal' || $modalPage == 'Legal'}
+        <About />
+      {:else if $modalPage == 'Log'}
+        {#if $hasAccess}
+          <SystemLog />
+        {:else}
+          <div>Please enter Access Key in Settings to view system log.</div>
+        {/if}
+      {:else if $modalPage == 'Device'}
+        {#if $hasAccess}
+          <DeviceConfig />
+        {:else}
+          <div>Please enter Access Key in Settings to view device config.</div>
+        {/if}
+      {:else if $modalPage == 'Channels'}
+        {#if $hasAccess}
+          <Channels />
+        {:else}
+          <div>Please enter Access Key in Settings to view channel config.</div>
+        {/if}
+      {/if}
+    </div>
+  </div>
+</Modal>
+

@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#app {
+  display: contents;
+  color: #e7e7e7;
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #FF871D;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #ffb773;
+}
+
+div {
+  /* @apply items-center; */
+}
+
+body {
+  margin: 0;
+  display: flex;
+  /* min-width: 320px; */
+  min-height: 100vh;
+  height: 100vh;
+  background: #1e1f22;
+}
+
+h2 {
+  @apply select-none p-1 px-3 font-bold text-white;
+  background: #232428;
+  border-bottom: 1px solid #3f4147;
+}
+
+.header-t {
+  @apply select-none p-1 px-3 font-bold text-white rounded-t;
+  background: #232428;
+}
+
+.header-t + * {
+  @apply rounded-b p-1 px-3 shadow-inner shadow-black/50 bg-black/20;
+}
+
+.input {
+  @apply rounded p-1 px-2;
+  background: #1e1f22;
+  border: 1px solid #3f4147;
+}
+
+.input,
+.btn {
+  @apply focus:outline focus:outline-2;
+  outline-color: #FF871D;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+.btn {
+  @apply px-2 py-0.5 rounded;
+  color: #f2f3f5;
+  background: #3b3d44;
+  border: 1px solid #4b4d55;
+  font-weight: 600;
+}
+
+.btn-inactive {
+  @apply px-2 py-0.5 bg-gray-600/50 rounded text-blue-100 border-blue-500;
+}
+
+.btn-active {
+  @apply px-2 py-0.5 bg-green-500/50 rounded text-blue-100 border-blue-500;
+}
+
+button:hover {
+  @apply brightness-110;
+}
+
+button:active {
+  @apply brightness-90;
+}
+
+.card {
+  @apply bg-black/20 border border-black/50 rounded-lg p-2;
+}
+
+.label {
+  @apply select-none;
+}
+
+.ol-layers {
+  transition: filter .3s;
+}
+
+.ol-control-darkmode {
+  top: 73px;
+  left: .5em;
+}
+
+button:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
+input[type='checkbox'], input[type='range'] { accent-color: #FF871D; }
+summary { color: #FF871D; }
+::selection { background: #FF871D; color: #050505; }
+.ol-control button { background: #101010 !important; color: #FF871D !important; }
+.legal-copy { max-width: 70ch; line-height: 1.65; }
+
+/* Black Edition: charcoal community panels with MHUK orange accents. */
+.panel-body { background: #313338; }
+.app-sidebar .panel-body { background: #2b2d31; }
+.node-card { background: #35373e; border: 1px solid #41434a; border-left: 3px solid #555760; }
+.node-card:hover { background: #3b3d44; border-left-color: #FF871D; }
+.node-card.node-own { border-left-color: #FF871D; background: #38383d; }
+.btn:hover:not(:disabled) { border-color: #FF871D; background: #46413c; }
+.btn:focus-visible { outline-color: #FF871D; }
+.btn-primary { background: #FF871D; border-color: #FF871D; color: #17181a; }
+.message-card { background: #383a40; border: 1px solid #44464d; border-left: 3px solid #FF871D; border-radius: 4px; padding: 8px 10px; margin: 6px 0; }
+.edition-title { color: #FF871D; }
+.toolbar-icon { min-width: 27px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #232428; }
+::-webkit-scrollbar-thumb { background: #484b52; border-radius: 6px; }

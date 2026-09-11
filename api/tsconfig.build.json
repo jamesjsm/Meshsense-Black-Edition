@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "target": "ESNext", "module": "ESNext" },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "meshtastic-js/src", "webbluetooth/src"]
+}

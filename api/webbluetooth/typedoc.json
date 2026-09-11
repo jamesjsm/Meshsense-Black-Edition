@@ -1,0 +1,10 @@
+{
+    "name": "Node Web Bluetooth",
+    "entryPoints": [
+        "src"
+    ],
+    "entryPointStrategy": "expand",
+    "excludeExternals": true,
+    "excludePrivate": true,
+    "hideGenerator": true
+}

@@ -3,8 +3,28 @@ name: Build desktop packages
 on:
   workflow_dispatch:
     inputs:
+      windows:
+        description: Windows x64
+        type: boolean
+        default: true
+      mac_arm:
+        description: macOS Apple Silicon
+        type: boolean
+        default: true
+      mac_intel:
+        description: macOS Intel
+        type: boolean
+        default: true
+      linux:
+        description: Linux x64 desktop (including Mint)
+        type: boolean
+        default: true
+      pi:
+        description: Raspberry Pi ARM64 headless
+        type: boolean
+        default: true
       draft_release:
-        description: Create a draft release after all builds pass
+        description: Create a draft release after all selected builds pass
         type: boolean
         default: false
 
@@ -12,19 +32,48 @@ permissions:
   contents: read
 
 jobs:
+  select-platforms:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      desktop: ${{ steps.select.outputs.desktop }}
+    steps:
+      - name: Select requested platforms
+        id: select
+        env:
+          BUILD_WINDOWS: ${{ inputs.windows }}
+          BUILD_MAC_ARM: ${{ inputs.mac_arm }}
+          BUILD_MAC_INTEL: ${{ inputs.mac_intel }}
+          BUILD_LINUX: ${{ inputs.linux }}
+          BUILD_PI: ${{ inputs.pi }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const choices = [
+            ['BUILD_WINDOWS', 'windows-latest', 'windows-x64'],
+            ['BUILD_MAC_ARM', 'macos-15', 'macos-arm64'],
+            ['BUILD_MAC_INTEL', 'macos-15-intel', 'macos-x64'],
+            ['BUILD_LINUX', 'ubuntu-24.04', 'linux-x64'],
+          ];
+          const include = choices.filter(([key]) => process.env[key] === 'true')
+            .map(([, runner, platform]) => ({ runner, platform }));
+          if (!include.length && process.env.BUILD_PI !== 'true') {
+            console.error('Select at least one platform before starting the workflow.');
+            process.exit(1);
+          }
+          const desktop = include.length > 0;
+          // Keep a valid matrix when the desktop job is skipped for a Pi-only run.
+          const matrix = { include: desktop ? include : [{runner: 'ubuntu-latest', platform: 'unused'}] };
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,
+            `desktop=${desktop}\nmatrix=${JSON.stringify(matrix)}\n`);
+          NODE
+
   build:
+    needs: select-platforms
+    if: needs.select-platforms.outputs.desktop == 'true'
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - runner: windows-latest
-            platform: windows-x64
-          - runner: macos-15
-            platform: macos-arm64
-          - runner: macos-15-intel
-            platform: macos-x64
-          - runner: ubuntu-24.04
-            platform: linux-x64
+      matrix: ${{ fromJSON(needs.select-platforms.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     env:
@@ -67,6 +116,8 @@ jobs:
           retention-days: 30
 
   pi-headless:
+    needs: select-platforms
+    if: inputs.pi
     runs-on: ubuntu-24.04-arm
     container: node:24-bookworm
     timeout-minutes: 60
@@ -93,8 +144,12 @@ jobs:
           retention-days: 30
 
   draft-release:
-    if: inputs.draft_release
-    needs: [build, pi-headless]
+    if: >-
+      always() && !cancelled() && inputs.draft_release &&
+      needs.select-platforms.result == 'success' &&
+      (needs.build.result == 'success' || needs.build.result == 'skipped') &&
+      (needs.pi-headless.result == 'success' || needs.pi-headless.result == 'skipped')
+    needs: [select-platforms, build, pi-headless]
     runs-on: ubuntu-latest
     permissions:
       contents: write

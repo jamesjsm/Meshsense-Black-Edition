@@ -61,7 +61,15 @@ export let wss: WebSocketHTTPServer
 
 async function initSever() {
   /** Begin Listening for connections */
-  server = app.listen(Number(process.env.PORT) || (await getPort({ port: 5920 })), process.env.MESHSENSE_BIND_HOST || '127.0.0.1')
+  const port = Number(process.env.PORT) || (await getPort({ port: 5920 }))
+  // Binding a host is asynchronous: do not announce readiness with a null address.
+  await new Promise<void>((resolve, reject) => {
+    server = app.listen(port, process.env.MESHSENSE_BIND_HOST || '127.0.0.1', () => {
+      server.removeListener('error', reject)
+      resolve()
+    })
+    server.once('error', reject)
+  })
   wss = new WebSocketHTTPServer(server, { path: '/ws' })
 
   State.subscribe(({ state, action, args }) => {

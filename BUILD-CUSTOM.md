@@ -45,7 +45,7 @@ Use **Node.js 24.x** and **Python 3** (the `py` command on Windows). Python buil
 Open PowerShell and run:
 
 ```powershell
-cd "C:\Users\JAMES\meshsensecode\MeshSense-master"
+cd "C:\Users\#user#\meshsensecode\MeshSense-master"
 node --version
 node build-custom.mjs
 ```

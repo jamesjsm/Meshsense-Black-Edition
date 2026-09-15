@@ -1,18 +1,20 @@
 # Meshsense Black Edition — modification notice
 
-Modified on 11 September 2026. Release: 1.1.0-black.6.
+Release: 1.1.0-black.6. Code modifications through 12 September 2026; publication documentation updated 15 September 2026.
+
+The public Black.6 pre-release includes the Linux server-listening timing fix and platform-selection checkboxes. Automated builds and startup checks have passed for Windows, both Mac targets, Linux x64 and Pi ARM64. Real-device testing remains separate from these checks.
 
 Black.6 adds a separate ARM64 headless Pi package built in Debian Bookworm, with a Node 24 prerequisite, user service example, SSH-tunnel browser access and its own hosted startup test. Pi hardware validation remains outstanding. Desktop builds remain included. Localhost UI controls now also recognise 127.0.0.1 and IPv6 loopback.
 
 Black.5: bounded HTTP retries and request timeouts, cancellation, explicit TLS persistence protected against generic WebSocket overwrites, discarded stale startup state, auto-connect off by default, loopback-only internal server by default and macOS Local Network usage description. See MAC-CONNECTION-TEST.md for remaining ad-hoc signing limitations and real-Mac checks.
 
-Added Linux x64 AppImage to GitHub builds and draft release assets. Linux compiles the pinned native Bluetooth source and uses its adapter availability check, avoiding the separate node-ble native dependency path. Linux runtime verification remains outstanding.
+Added Linux x64 AppImage to GitHub builds and draft release assets. Linux compiles the pinned native Bluetooth source and uses its adapter availability check, avoiding the separate node-ble native dependency path. Real Linux desktop and radio verification remains outstanding.
 
-Linux startup follow-up: skip native Bluetooth discovery when sysfs reports no adapter or the system D-Bus socket is absent. CI starts a dedicated D-Bus session alongside Xvfb. This addresses the observed stall before the HTTP server starts on a runner without Bluetooth hardware; a new hosted run is needed to confirm it.
+Linux startup follow-up: skip native Bluetooth discovery when sysfs reports no adapter or the system D-Bus socket is absent. CI starts a dedicated D-Bus session alongside Xvfb. This addresses the observed stall before the HTTP server starts on a runner without Bluetooth hardware; the subsequent hosted startup check passed.
 
-Added manual GitHub Actions builds for Windows x64 and macOS Intel/Apple Silicon, matching per-platform source assets, checksums and optional draft releases. macOS uses locally compiled Bluetooth source and ad-hoc signing, without notarisation. The first hosted builds and Mac hardware tests remain outstanding.
+Added manual GitHub Actions builds for Windows x64 and macOS Intel/Apple Silicon, matching per-platform source assets, checksums and optional draft releases. macOS uses locally compiled Bluetooth source and ad-hoc signing, without notarisation. Hosted builds have passed; Mac hardware and permission testing remains outstanding.
 
-Maintenance update: Electron upgraded from 33.4.11 to 44.3.0, pinned in the dependency manifest and lockfile. Previous Black.2 packages remain separate for rollback. Live radio, Linux and macOS verification remains outstanding.
+Maintenance update: Electron upgraded from 33.4.11 to 44.3.0, selected by the lockfile. Previous Black.2 packages remain separate for rollback. Live radio, Linux and macOS verification remains outstanding.
 
 This is an independent modified version of MeshSense, originally developed by Affirmatech Inc. It is not an official Affirmatech release and does not claim endorsement or permission to use any trademark. Original copyright notices and the GNU GPL version 3 licence are retained. Copyright in modifications remains with their respective contributors (2026).
 
@@ -34,10 +36,8 @@ Changes in this edition:
 
 ## Source distribution
 
-The matching `Meshsense-Black-Edition-1.1.0-black.3-source.zip` accompanies the installer. The identical archive is available through About / Legal → Download this version's source. Supply that archive alongside this exact installer whenever sharing it. It contains the application source, restored Meshtastic/WebBluetooth/SimpleBLE sources, dependency package sources, lockfiles, notices and build scripts. Dependency sources are collected under `vendor/npm`; normal development installation still uses the lockfiles.
+Each released application package has a matching platform-labelled source ZIP on the [public release page](https://github.com/jamesjsm/Meshsense-Black-Edition/releases/tag/v1.1.0-black.6). Supply the matching archive alongside that exact package when redistributing it. The archives contain application and dependency source, lockfiles, notices and build scripts. Dependency package sources are collected under `vendor/npm`; normal development installation still uses the lockfiles. About / Legal also offers the source archive included in the application build.
 
-No public repository or external source download has been published for this edition. Publishing this fork or securing naming/logo permissions is not represented as completed by these notices. Review branding permissions before a public release. Source and licence compliance does not itself grant trademark rights.
+The public repository is https://github.com/jamesjsm/Meshsense-Black-Edition. Publication does not imply endorsement or trademark permission. Original copyright and licence notices remain intact.
 
-Build instructions are in BUILD-CUSTOM.md. The original source repository is https://github.com/Affirmatech/MeshSense.
-
-
+Build instructions are in BUILD-CUSTOM.md and GITHUB-BUILDS.md. The original source repository is https://github.com/Affirmatech/MeshSense.

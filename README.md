@@ -1,97 +1,47 @@
-<!-- Independent modification dated 2026-09-08; GPLv3; see MODIFICATIONS.md. -->
 # Meshsense Black Edition
 
-Based on MeshSense by Affirmatech. This is an independent modified release, not an official Affirmatech release. See [MODIFICATIONS.md](MODIFICATIONS.md), [LICENSE](LICENSE), and [BUILD-CUSTOM.md](BUILD-CUSTOM.md).
+An independent community modification of [MeshSense by Affirmatech](https://github.com/Affirmatech/MeshSense), for monitoring and mapping Meshtastic networks. This is not an official Affirmatech release.
 
-# MeshSense
+## Downloads
 
-For the personal **1.1.0-black.1** build with separate traceroute directions and node information requests, see [BUILD-CUSTOM.md](BUILD-CUSTOM.md).
+![Meshsense Black Edition showing the traceroute map and node information request controls](docs/images/meshsense-black-edition.png)
 
-**MeshSense** is a simple, [open-source](https://github.com/Affirmatech/MeshSense) application that monitors, maps and graphically displays all the vital stats of your area's Meshtastic network including connected nodes, signal reports, trace routes and more!
+Download **1.1.0-black.6**, currently a testing pre-release, from [GitHub Releases](https://github.com/jamesjsm/Meshsense-Black-Edition/releases/tag/v1.1.0-black.6).
 
-![](https://affirmatech.com/meshsense.png)
+| Computer | Download ending |
+| --- | --- |
+| Windows Intel/AMD 64-bit | `-x64.exe` |
+| Linux desktop Intel/AMD 64-bit, including Linux Mint | `-linux-x64.AppImage` |
+| Mac Apple Silicon | `-macos-arm64.dmg` |
+| Intel Mac | `-macos-x64.dmg` |
+| Raspberry Pi with 64-bit OS | `-pi-arm64-headless.tar.gz` |
 
-MeshSense directly connects to your Meshtastic node via Bluetooth or WiFi and continuously provides all the information you need to assess the health of your network. For more detailed information, take a peek at our [Frequently Asked Questions](https://affirmatech.com/meshsense/faq) or [Bluetooth Tips](https://affirmatech.com/meshsense/bluetooth).
+Read the matching README asset for installation. Linux desktop users must allow executing the AppImage as a program. The Pi package runs without Electron or a desktop and requires Node.js 24; follow the [Pi installation guide](pi/README-PI.md), including SSH-tunnel browser access.
 
-## Headless Usage
+Windows builds are unsigned. Mac builds are ad-hoc signed and not notarised; see [Mac connection testing](MAC-CONNECTION-TEST.md) for remaining Local Network permission limitations. Automated builds and startup checks have passed for all five targets, but this does not establish complete real-device compatibility.
 
-To run MeshSense without a GUI, use the `--headless` flag. Additionally the `ACCESS_KEY` environment variable can be used to specify the privileged access key for remote connections to gain full permissions.
+## Features
 
-```sh
-export ADDRESS=10.0.1.20  # Address of Meshtastic Node
-export PORT=5920          # Port of remote interface
+- Charcoal theme with orange highlights and a link to [MeshHub UK](https://meshhub.uk/).
+- Separate outward and return traceroutes, with missing-position sections distinguished on the map.
+- Mesh overview links when no individual route is selected.
+- Compact node-data requests for node information, telemetry and position, with cooldowns and dismissing status messages.
+- Bounded connection retries, connection timeouts and explicit persistent TLS settings.
+- Selectable GitHub builds for Windows, both Mac architectures, Linux desktop and Raspberry Pi headless.
 
-ACCESS_KEY=mySecretKey ./meshsense-x86_64.AppImage --headless
+## Build this edition
 
-# Alternative execution:
-dbus-run-session xvfb-run ./meshsense-arm64.AppImage --headless \
- --disable-gpu --in-process-gpu --disable-software-rasterizer
-```
-
-See also [Headless FAQ](https://affirmatech.com/meshsense/faq#headless)
-
-## Debian Dependencies
-
-Ubuntu and Raspberry Pi OS users will need the following dependency installed to run the AppImage:
-
-```sh
-sudo apt install libfuse2
-```
-
-To display unicode symbols on the buttons, it may be helpful to install `fonts-noto-color-emoji`
+Clone this repository:
 
 ```sh
-sudo apt install fonts-noto-color-emoji
+git clone https://github.com/jamesjsm/Meshsense-Black-Edition.git
+cd Meshsense-Black-Edition
 ```
 
-## Development Setup
+Follow [GitHub build instructions](GITHUB-BUILDS.md) for hosted builds, or [local build instructions](BUILD-CUSTOM.md). Dependency source directories are populated in this repository; keep their pinned contents. The fork's build entry point is `build-custom.mjs`.
 
-To run MeshSense from the source code, first clone the MeshSense repo:
+## Source and attribution
 
-```sh
-git clone --recurse-submodules https://github.com/Affirmatech/MeshSense.git
-cd MeshSense
-```
+Licensed under GNU GPL version 3; see [LICENSE](LICENSE), [modification notices](MODIFICATIONS.md) and [third-party notices](THIRD-PARTY-NOTICES.txt). Original MeshSense copyright and attribution are retained. No endorsement by Affirmatech is claimed.
 
-Build `webbluetooth` Dependency.  Debian systems will need the `cmake` and `libdbus-1-dev` packages.
-
-```
-cd api/webbluetooth
-npm i
-npm run build:all
-cd ../..
-```
-
-The `update.mjs` script will pull the latest code and install dependencies for the `ui`, `api`, and `electron` directories.
-
-```sh
-./update.mjs
-```
-
-During development, the electron portion is usually not needed. First start the UI Vite service as follows:
-
-```sh
-cd ui
-PORT=5921 npm run dev
-```
-
-Leave the UI running and then also start the API service. The `DEV_UI_URL` will tell the API to forward any unhandled route requests to the UI service and should use the same port as above.
-
-```sh
-cd api
-export DEV_UI_URL=http://localhost:5921
-PORT=5920 npm run dev
-```
-
-The `PORT` variables in the above are optional and will default to the values in the example, but ensure `DEV_UI_URL` is present with the correct port if changed. These values may also be read from `.env` files `api/.env` and `ui/.env` respectively.
-
-The front-end should now be accessible by connecting to the **API** service in a browser. Be careful not to connect to the UI service by accident. http://localhost:5920/
-
-Any API changes will automatically reload the service. Any UI changes will be hot-reloaded by Vite.
-
-**Please note:** currently certain event subscribers (particularly State variables) will duplicate their subscription when Vite hot-reloads resulting in duplicate events such as Log entries. Until this is fixed, the easiest solution is to refresh the browser to reset the events.
-
-To build the `ui`, `api`, and `electron` components, the `build.mjs` script will accomplish this. The official electron builds are signed with an Affirmatech certificate on our build servers. The deployables will be placed in `api/dist` and `electron/dist`.
-
-
-
+Each application release has a matching platform-labelled source ZIP containing source, dependency sources, notices and build instructions. Keep that matching source available alongside any redistributed application package. GitHub's automatically generated repository archives are separate from these prepared source packages.

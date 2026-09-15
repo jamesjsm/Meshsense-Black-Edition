@@ -1,0 +1,6 @@
+1. Copy README.md, MODIFICATIONS.md, RELEASE-NOTES.md and GITHUB-BUILDS.md into your GitHub repository folder, replacing the existing files. Commit and Push origin.
+2. On GitHub open Releases, edit v1.1.0-black.6 and replace its description with the contents of RELEASE-NOTES.md. Save the release; retain pre-release status and all existing assets.
+3. On the repository home page, click the gear beside About. Set Description to:
+Independent community edition of MeshSense for Meshtastic, with clearer traceroutes, node-data requests and Windows, macOS, Linux and Raspberry Pi builds.
+Set Website to: https://meshhub.uk/
+4. No application rebuild is needed for these documentation changes. Existing source assets remain the source snapshots for their binaries; do not replace them with documentation-only archives.

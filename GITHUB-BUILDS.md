@@ -1,8 +1,6 @@
-# Build installers on GitHub
+# Build packages on GitHub
 
-Black.6 additionally builds **desktop-pi-arm64-headless** on an ARM64 runner inside Debian Bookworm. This is a separate service tarball, not an AppImage. See `pi/README-PI.md`: Node 24 is required on the Pi, browser access uses an SSH tunnel, and no desktop is needed. Draft releases now wait for the four desktop jobs and the Pi job. Its first hosted build and real-Pi test remain outstanding.
-
-Updated for Black.5. The previous Black.4 Windows and Mac jobs passed on GitHub. Black.5 includes connection fixes and adds a Linux x64 job; its hosted builds and real-device retests remain outstanding. Existing installers are unchanged.
+Black.6 supports Windows x64, macOS Apple Silicon, macOS Intel, Linux x64 and Raspberry Pi ARM64 headless. All five hosted builds and startup checks have passed. Hardware testing remains separate. Pi uses Debian Bookworm, requires Node 24 on the Pi and uses SSH-tunnel browser access; see [the Pi guide](pi/README-PI.md).
 
 ## Upload the project
 
@@ -12,15 +10,15 @@ Updated for Black.5. The previous Black.4 Windows and Mac jobs passed on GitHub.
 
 ## Run a build
 
-On GitHub open **Actions → Build desktop packages → Run workflow**. Leave **Create a draft release** off for the first test run. Four jobs build Windows x64, macOS Apple Silicon, macOS Intel and Linux x64 on matching hosted machines. No Apple certificate or other secret is required for these testing builds.
+On GitHub open **Actions → Build desktop packages → Run workflow**. Leave **Create a draft release** off for the first test run. Tick only the platforms you want: Windows, macOS Apple Silicon, macOS Intel, Linux desktop and/or Pi headless. Select at least one. Unselected jobs are omitted or shown as skipped. No Apple certificate or other secret is required for these testing builds.
 
-When a run succeeds, download its four **Artifacts**. Each contains a package, matching source, readme and checksums: Windows `.exe`, Macs `.dmg`, Linux `.AppImage`. Actions downloads require GitHub access and expire after 30 days; use Releases for lasting downloads.
+When a run succeeds, download the **Artifacts** for the selected platforms. Each contains a package, matching source, readme and checksums: Windows `.exe`, Macs `.dmg`, Linux `.AppImage`, Pi headless `.tar.gz`. Actions downloads require GitHub access and expire after 30 days; use Releases for lasting downloads.
 
-If a job fails, open the red step and share its log. Linux requires its first hosted build. For Macs, follow MAC-CONNECTION-TEST.md: successful packaging does not establish Finder/Dock Local Network access with ad-hoc signing.
+If a job fails, open the red step and share its log. For Macs, follow MAC-CONNECTION-TEST.md: successful packaging does not establish Finder/Dock Local Network access with ad-hoc signing.
 
 ## Create downloadable EXE/DMG releases
 
-Once testing is satisfactory, run the workflow with **Create a draft release** selected. All four builds must pass before it creates a draft pre-release tagged from the exact build commit. Review the notes and assets in **Releases**, then publish manually. The workflow never publishes a release automatically.
+Once testing is satisfactory, run the workflow with **Create a draft release** selected. All selected builds must pass before it creates a draft pre-release tagged from the exact build commit. Review the notes and assets in **Releases**, then publish manually. The workflow never publishes a release automatically.
 
 Use a new version in `electron/package.json` for each new release. Update modification dates/notices too. An existing release tag causes creation to fail rather than overwrite its files. A failed draft step does not remove successful build artifacts.
 
